@@ -1,0 +1,8 @@
+
+results/
+singularity/
+stmp/
+work/
+null/
+.nextflow/
+.nextflow*

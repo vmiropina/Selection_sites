@@ -1,0 +1,5 @@
+N E X T F L O W  ~  version 22.04.3
+Launching `main.nf` [sad_kare] DSL2 - revision: 091b80ffb9
+No such variable: cancer_effect_in
+
+ -- Check script 'main.nf' at line: 91 or see '.nextflow.log' file for more details
