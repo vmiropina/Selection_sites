@@ -40,7 +40,7 @@ process WAIT{
     label 'bashprocess'
 
     input:
-    val cancer from cancer_effect_in.toList()
+    val cancer from cancer_effect_in.collect()
 
     output:
     val cancer
