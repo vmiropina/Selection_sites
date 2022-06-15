@@ -9,29 +9,30 @@ input_dir = "/nfs/users/dweghorn/projects/Selection_sites/"
 dir = "/nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/"
 
 def do_plots(name, cov, effect_considered, effect_simulated, bin_type, suffix, reps):
-    
+    if 'align' in bin_type: 
+        realdatafile = input_dir + 'data/data_all_covariates_' + effect_simulated + '_align_sites/data_all_covariates_' + effect_simulated + '_align_sites_%s.bed.gz'%name
+    else:
+        realdatafile = input_dir + 'data/data_all_covariates_' + effect_simulated + '_sites/data_all_covariates_' + effect_simulated + '_sites_%s.bed.gz'%name
+    columns = ['obs']
+    df =  pd.read_csv(realdatafile, sep = '\t', usecols = columns, compression='gzip')
+    m = np.min(df['obs'])
+    M = np.max(df['obs'])
+    counts , bins = np.histogram(df['obs'], bins = np.linspace(m,M+2,int(M-m+3)))
+    del df
+
+
     # Read simulated data
     simulatedfolder =  dir + effect_simulated + '/' + effect_considered + '/' + name + "/simulated_data/"
     simulatedfile = simulatedfolder + bin_type + suffix + "_" + cov + ".csv"
 
     df =  pd.read_csv(simulatedfile, sep = '\t')
 
-    obs_0 = np.array(df['0'] )
+    counts_0, bins_0 = np.histogram(df['0'] , bins = np.linspace(m,M+2,int(M-m+3)))
     for i in range(1,reps):
-        obs_0 = np.concatenate((obs_0, np.array(df[str(i)])), axis = 0)
+        counts_0 += np.histogram(df[str(i)] , bins = np.linspace(m,M+2,int(M-m+3)))[0]
+    del df
 
     # Read real data
-    if 'align' in bin_type: 
-        realdatafile = input_dir + 'data/data_all_covariates_' + effect_simulated + '_align_sites/data_all_covariates_' + effect_simulated + '_align_sites_%s.bed.gz'%name
-    else:
-        realdatafile = input_dir + 'data/data_all_covariates_' + effect_simulated + '_sites/data_all_covariates_' + effect_simulated + '_sites_%s.bed.gz'%name
-
-    columns = ['obs']
-    df_real =  pd.read_csv(realdatafile, sep = '\t', usecols = columns, compression='gzip')
-    obs = df_real['obs']
-
-    counts , bins = np.histogram(obs, bins = np.linspace(min(obs),max(obs)+2,int(max(obs)-min(obs)+3)))
-    counts_0, bins_0 = np.histogram(obs_0, bins = np.linspace(min(obs),max(obs)+2,int(max(obs)-min(obs)+3)))
     log_counts = np.nan_to_num((np.log(counts+1)), posinf=0.0, neginf=0.0, nan=0.0)
     log_counts_0 = np.nan_to_num((np.log(counts_0/reps+1)), posinf=0.0, neginf=0.0, nan=0.0)
 

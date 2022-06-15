@@ -47,8 +47,7 @@ def loop_exons_or_genes(P, mistarget, mut_mat_vec, outfile, bin, flag, effect, t
         COLUMN_NAMES = ['gene', 'context', 'pos', 'mi', 'l_s' ,'lambda_s' ]
     elif bin=='exon':
         COLUMN_NAMES = ['exon', 'context', 'pos', 'mi', 'l_s' ,'lambda_s' ]
-    #for i in range(len(P)):
-    for i in range(10):
+    for i in range(len(P)):
         genes = []
         contexts = []
         pos = [] 
@@ -69,9 +68,7 @@ def loop_exons_or_genes(P, mistarget, mut_mat_vec, outfile, bin, flag, effect, t
                     r = m_i/l_s     
                     n_obs = generate_n(r, s_obs, theta, m, c, 200)
                 elif effect == "syn":
-                    print(str(lambda_s*m_i/l_s))
                     n_obs = generate_s(lambda_s, m_i, l_s, (c, reps))
-                    print(np.max(n_obs))
             except :
                 n_obs = np.zeros(c)
             for j in range(len(n_obs)): 
@@ -185,9 +182,14 @@ else:
 
 effect_simulated = "syn"
 
-Q = pd.read_csv(dir + effect_simulated + '/'+ effect_considered + '/' + name + "/glm/fcovariates/fcovariates_genes.csv.gz", sep=',', compression='gzip')
+if 'align' in bin_type:
+    Q = pd.read_csv(dir + effect_simulated + '/'+ effect_considered + '/' + name + "/glm/fcovariates/fcovariates_align_genes.csv.gz", sep=',', compression='gzip')
+else:
+    Q = pd.read_csv(dir + effect_simulated + '/'+ effect_considered + '/' + name + "/glm/fcovariates/fcovariates_genes.csv.gz", sep=',', compression='gzip')
 
 list_of_genes = list(Q['gene'])
+
+del Q
 
 cov = 'cov'
 

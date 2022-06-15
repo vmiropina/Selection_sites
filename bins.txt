@@ -1,2 +1,12 @@
 genes 
+exons 
+sites 
+genes_cpgi 
+exons_cpgi 
+sites_cpgi 
 align_genes 
+align_exons 
+align_sites 
+align_genes_cpgi 
+align_exons_cpgi 
+align_sites_cpgi

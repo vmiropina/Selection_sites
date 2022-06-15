@@ -22,7 +22,7 @@ process REGRESSIONS{
    }
 
 process SIMULATIONS{
-    label 'pythonprocess'
+    label 'pythonprocess1'
 
     input:
     val cancertypes_in
@@ -37,7 +37,7 @@ process SIMULATIONS{
    }
 
 process PLOTS{
-    label 'pythonprocess'
+    label 'pythonprocess2'
 
     input:
     val cancertypes_in
