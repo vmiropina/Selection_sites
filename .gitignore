@@ -6,3 +6,6 @@ work/
 null/
 .nextflow/
 .nextflow*
+logs
+logs2
+log
