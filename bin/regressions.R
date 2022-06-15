@@ -79,9 +79,9 @@ merge_cbase_info <- function(data, cbase_path, bin_type, cpgi, suffix_cpgi, vars
     colnames(data_cbase) <- c('gene', 'l_s', 'lambda_s')
     data_combined <- merge(data, data_cbase, by = 'gene')
     if(grepl( 'align', bin_type, fixed = TRUE)){
-      data_sites <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_align_sites/data_all_covariates_', effect_simulated, '_align_sites_', name, '.bed.gz', sep = ''), sep = '\t')
+      data_sites <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_align_sites/data_all_covariates_', effect_simulated, '_align_sites_', name, '.bed.gz', sep = ''), sep = '\t', select=c("CpGI", "tri_tx", "mi", "exon"))
     }else{
-      data_sites <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_sites/data_all_covariates_', effect_simulated, '_sites_', name, '.bed.gz', sep = ''), sep = '\t')
+      data_sites <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_sites/data_all_covariates_', effect_simulated, '_sites_', name, '.bed.gz', sep = ''), sep = '\t', select=c("CpGI", "tri_tx", "mi", "exon"))
     }
     if(cpgi == 0 || cpgi == 1){
       data_sites <- data_sites[data_sites$CpGI == cpgi, ]
@@ -121,7 +121,6 @@ merge_cbase_info <- function(data, cbase_path, bin_type, cpgi, suffix_cpgi, vars
     selected_cols <- !names(data_combined) %in% pos_vars
     data_combined <- data_combined[, ..selected_cols]
   }
-  
   return(list(data_combined, data_position))
 }
 
@@ -145,11 +144,11 @@ run_regressions <- function(data, scaled_data, dirname){
     model_pois_o_sd = glm( data$obs ~ offset(log(data$expected_s)) + ., scaled_data,  family=poisson(link=log))
     print(summary(model_pois_o_sd))
     data$pred_pois_o_sd = predict(model_pois_o_sd, type = "response")
-    png(file=paste(dirname, "/obs_vs_pred/poisson_o_sd_",name,".png",sep=""),width=1200, height=900)
+    png(file=paste(dirname, "/obs_vs_pred/poisson_o_sd_",bin_type,".png",sep=""),width=1200, height=900)
     plot(data$obs, data$pred_pois_o_sd)
     dev.off()
-    save( model_pois_o_sd, file=paste(dirname, "/Rmodels/poisson_o_sd_",name,".Rdata" , sep = ''))
-    plot_histogram(model_pois_o_sd, paste(dirname, "/histograms/poisson_o_sd_",name,".png",sep="") , 30)
+    save( model_pois_o_sd, file=paste(dirname, "/Rmodels/poisson_o_sd_",bin_type,".Rdata" , sep = ''))
+    plot_histogram(model_pois_o_sd, paste(dirname, "/histograms/poisson_o_sd_",bin_type,".png",sep="") , 30)
   }, error = function(e){
     print('Pois did not converge')
   })
@@ -159,11 +158,11 @@ run_regressions <- function(data, scaled_data, dirname){
     model_nb_o_sd = glm.nb( data$obs ~ offset(log(data$expected_s)) + ., scaled_data)
     print(summary(model_nb_o_sd))
     data$pred_nb_o_sd = predict(model_nb_o_sd, type = "response")
-    png(file=paste(dirname, "/obs_vs_pred/negbin_o_sd_",name,".png",sep=""),width=1200, height=900)
+    png(file=paste(dirname, "/obs_vs_pred/negbin_o_sd_",bin_type,".png",sep=""),width=1200, height=900)
     plot(data$obs, data$pred_nb_o_sd)
     dev.off()
-    save( model_nb_o_sd, file=paste(dirname, "/Rmodels/negbin_o_sd_",name,".Rdata" , sep = ''))
-    plot_histogram(model_nb_o_sd, paste(dirname, "/histograms/negbin_o_sd_",name,".png",sep="") , 30)
+    save( model_nb_o_sd, file=paste(dirname, "/Rmodels/negbin_o_sd_",bin_type,".Rdata" , sep = ''))
+    plot_histogram(model_nb_o_sd, paste(dirname, "/histograms/negbin_o_sd_",bin_type,".png",sep="") , 30)
   }, error = function(e){
     print('NB did not converge')
     })
@@ -178,11 +177,11 @@ run_regressions <- function(data, scaled_data, dirname){
                               dist ="poisson", link = "logit")
     print(summary(model_zip_o_sd))
     data$pred_zip_o_sd = predict(model_zip_o_sd, type = "response")
-    png(file=paste(dirname, "/obs_vs_pred/zip_o_sd_",name,".png",sep=""),width=1200, height=900)
+    png(file=paste(dirname, "/obs_vs_pred/zip_o_sd_",bin_type,".png",sep=""),width=1200, height=900)
     plot(data$obs, data$pred_zip_o_sd)
     dev.off()
-    save( model_zip_o_sd, file=paste(dirname, "/Rmodels/zip_o_sd_",name,".Rdata" , sep = ''))
-    plot_histogram(model_zip_o_sd, paste(dirname, "/histograms/zip_o_sd_",name,".png",sep="") , 30)
+    save( model_zip_o_sd, file=paste(dirname, "/Rmodels/zip_o_sd_",bin_type,".Rdata" , sep = ''))
+    plot_histogram(model_zip_o_sd, paste(dirname, "/histograms/zip_o_sd_",bin_type,".png",sep="") , 30)
   }, error = function(e){
     print('ZIP did not converge')})
   
@@ -192,11 +191,11 @@ run_regressions <- function(data, scaled_data, dirname){
                                 dist ="negbin", link = "logit")
     print(summary(model_zinb_o_sd))
     data$pred_zinb_o_sd = predict(model_zinb_o_sd, type = "response")
-    png(file=paste(dirname, "/obs_vs_pred/zinb_o_sd_",name,".png",sep=""),width=1200, height=900)
+    png(file=paste(dirname, "/obs_vs_pred/zinb_o_sd_",bin_type,".png",sep=""),width=1200, height=900)
     plot(data$obs, data$pred_zinb_o_sd)
     dev.off()
-    save( model_zinb_o_sd, file=paste(dirname, "/Rmodels/zinb_o_sd_",name,".Rdata" , sep = ''))
-    plot_histogram(model_zinb_o_sd, paste(dirname, "/histograms/zinb_o_sd_",name,".png",sep="") , 30)
+    save( model_zinb_o_sd, file=paste(dirname, "/Rmodels/zinb_o_sd_",bin_type,".Rdata" , sep = ''))
+    plot_histogram(model_zinb_o_sd, paste(dirname, "/histograms/zinb_o_sd_",bin_type,".png",sep="") , 30)
   }, error = function(e){
     print('ZINB did not converge')})
   list_of_models_and_data <- list(mget(c("model_pois_o_sd", "model_nb_o_sd", "model_zip_o_sd", "model_zinb_o_sd")), data)
@@ -284,7 +283,7 @@ create_dirs(dirname)
 if (!grepl( 'cpgi', bin_type, fixed = TRUE)){
 
 # Read data covariates
-data_cov <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_', bin_type, '/data_all_covariates_', effect_simulated, '_', bin_type, '_', name, '.bed.gz', sep = ''), sep = '\t')
+data_cov <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_', bin_type, '/data_all_covariates_', effect_simulated, '_', bin_type, '_', name, '.bed.gz', sep = ''), sep = '\t', drop=c("CpGI_status" ,"Nucleosomes","CRG36", "CpGme_Blood", "Recombination_bins", "DHS"))
 
 # Merge info with CBaSE values
 data_list <- merge_cbase_info(data_cov, cbase_path, bin_type, '', suffix)
@@ -308,7 +307,7 @@ best_model <- best_models_list[[2]]
 tryCatch({data_position$prediction <- predict(list_of_models[[best_model]], type = "response")}, error = function(e){data_position$prediction <<- rep(0, nrow(data_position)); print('Predict did not work :(')})
 fwrite(data_position,paste(dirname, '/fcovariates/fcovariates_', bin_type, '.csv.gz', sep=""),compress="gzip", row.names = FALSE)
 
-write.csv(best_models_df,paste(dirname, '/Rmodels/best_models',  bin_type,'.csv', sep=""), row.names = FALSE)
+write.csv(best_models_df,paste(dirname, '/Rmodels/best_models_',  bin_type,'.csv', sep=""), row.names = FALSE)
 
 }
 
@@ -320,9 +319,9 @@ if (grepl( 'cpgi', bin_type, fixed = TRUE)){
 print('do everything for 0')
 # Read data covariates
 if(grepl( 'sites', bin_type, fixed = TRUE) == FALSE){
-  data_cov_0 <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_', bin_type, '/data_all_covariates_', effect_simulated, '_', bin_type, '_', name, '_0.bed.gz', sep = ''), sep = '\t')
+  data_cov_0 <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_', bin_type, '/data_all_covariates_', effect_simulated, '_', bin_type, '_', name, '_0.bed.gz', sep = ''), sep = '\t', drop=c("CpGI_status" ,"Nucleosomes","CRG36", "CpGme_Blood", "Recombination_bins", "DHS"))
   }else{
-  data_cov <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_sites/data_all_covariates_', effect_simulated, '_sites_', name, '.bed.gz', sep = ''), sep = '\t')
+  data_cov <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_sites/data_all_covariates_', effect_simulated, '_sites_', name, '.bed.gz', sep = ''), sep = '\t', drop=c("CpGI_status" ,"Nucleosomes","CRG36", "CpGme_Blood", "Recombination_bins", "DHS"))
   data_cov_0 <- data_cov[data_cov$CpGI == 0, ]
   data_cov_1 <- data_cov[data_cov$CpGI == 1, ]
 }
@@ -358,7 +357,7 @@ print('do everything for 1')
 
 # Read data covariates
 if(grepl( 'sites', bin_type, fixed = TRUE) == FALSE){
-  data_cov_1 <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_', bin_type, '/data_all_covariates_', effect_simulated, '_', bin_type, '_', name, '_1.bed.gz', sep = ''), sep = '\t')
+  data_cov_1 <- fread(paste('/nfs/users/dweghorn/projects/Selection_sites/data/data_all_covariates_', effect_simulated, '_', bin_type, '/data_all_covariates_', effect_simulated, '_', bin_type, '_', name, '_1.bed.gz', sep = ''), sep = '\t', drop=c("CpGI_status" ,"Nucleosomes","CRG36", "CpGme_Blood", "Recombination_bins", "DHS"))
 }
 
 # Merge info with CBaSE values
@@ -395,6 +394,8 @@ print('do everything for 01')
 data <- rbind(data_0, data_1)
 data_position <- rbind(data_position_0, data_position_1)
 
+rm(data_0, data_1, data_position_0, data_position_1)
+
 # Scale data
 scaled_data <- scale_data(data)
 
@@ -412,9 +413,9 @@ best_model <- best_models_list[[2]]
 tryCatch({data_position$prediction <- predict(list_of_models[[best_model]], type = "response")}, error = function(e){data_position$prediction <<- rep(0, nrow(data_position)); print('Predict did not work :(')})
 data_position$CpGI <- data$CpGI
 fwrite(data_position,paste(dirname, '/fcovariates/fcovariates_', bin_type, '_01.csv.gz', sep=""),compress="gzip", row.names = FALSE)
-write.csv(best_models_df_0,paste(dirname, '/Rmodels/best_models',  bin_type,'_1.csv', sep=""), row.names = FALSE)
-write.csv(best_models_df_1,paste(dirname, '/Rmodels/best_models',  bin_type,'_0.csv', sep=""), row.names = FALSE)
-write.csv(best_models_df_01,paste(dirname, '/Rmodels/best_models',  bin_type,'_01.csv', sep=""), row.names = FALSE)
+write.csv(best_models_df_0,paste(dirname, '/Rmodels/best_models_',  bin_type,'_1.csv', sep=""), row.names = FALSE)
+write.csv(best_models_df_1,paste(dirname, '/Rmodels/best_models_',  bin_type,'_0.csv', sep=""), row.names = FALSE)
+write.csv(best_models_df_01,paste(dirname, '/Rmodels/best_models_',  bin_type,'_01.csv', sep=""), row.names = FALSE)
 
 }
 

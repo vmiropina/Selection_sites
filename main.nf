@@ -32,27 +32,11 @@ include { REG_SIM } from '/nfs/users/dweghorn/projects/Selection_sites/scripts/n
 
 
 cancertypes = Channel.fromPath('cancers_3mers.txt').splitText().map{ it -> it.trim() }
-//effect_considered = Channel.from("all", "synonymous", "nonsynonymous")  
-effect_considered = Channel.from("all") 
+effect_considered = Channel.from("all", "synonymous", "nonsynonymous")  
 cancer_effect = cancertypes.combine(effect_considered)
-
-process WAIT{
-    label 'bashprocess'
-
-    input:
-    val cancer from cancer_effect_in.collect()
-
-    output:
-    val cancer
-
-    script:
-    """
-    echo ${cancer}
-    """
-   }
    
 process COMPARISONS{
-    label 'pythonprocess'
+    label 'pythonprocess1'
 
     input:
     val cancer_effect_in
@@ -77,7 +61,10 @@ process FINAL{
 
     script:
     """
-    cat nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/best/chosen_model_${cancer_effect_in[0]}.csv
+    var="\$(cat /nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/best/chosen_model_align_${cancer_effect_in[0]}.csv)"
+    cp /nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/${cancer_effect_in[0]}/plots/hist_\${var}.png /nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/best/hist_align_${cancer_effect_in[0]}.png
+    var="\$(cat /nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/best/chosen_model_${cancer_effect_in[0]}.csv)"
+    cp /nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/${cancer_effect_in[0]}/plots/hist_\${var}.png /nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/best/hist_noalign_${cancer_effect_in[0]}.png
     """
    }
  
@@ -93,17 +80,16 @@ process GZIP{
 
     script:
     """
-    gzip nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/${cancer_effect_in[0]}/simulated_data/*
+    gzip /nfs/users/dweghorn/projects/Selection_sites/scripts/nextflow/results/syn/${cancer_effect_in[1]}/${cancer_effect_in[0]}/simulated_data/*
     """
    }
 
 
 workflow {
      REG_SIM(cancer_effect)
-     wait_out = WAIT(REG_SIM.out)
-     com_out = COMPARISONS(wait_out)
+     com_out = COMPARISONS(REG_SIM.out.collect())
      FINAL(com_out)
-     GZIP(com_out)
+     //GZIP(com_out)
 }
 
 /*
